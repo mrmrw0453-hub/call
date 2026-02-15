@@ -9,22 +9,24 @@ let chatHistory = [];
 const MAX_HISTORY = 20;
 
 app.post('/update', (req, res) => {
-    const { username, message, jobId, placeId } = req.body;
+    // أضفنا userId هنا
+    const { username, userId, message, jobId, placeId } = req.body;
     
     if (message) {
         const newMessage = {
-            id: Date.now() + Math.random(), // معرف فريد للرسالة
+            id: Date.now() + Math.random(),
             username: username || "Unknown",
+            userId: userId || 0, // أضفنا تخزين الـ id هنا
             message: message,
-            jobId: jobId || null, // معرف السيرفر للانضمام
-            placeId: placeId || null, // معرف اللعبة
+            jobId: jobId || null,
+            placeId: placeId || null,
             time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
         };
 
         chatHistory.push(newMessage);
-        if (chatHistory.length > MAX_HISTORY) chatHistory.shift(); // حذف القديم
+        if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
 
-        console.log(`[${newMessage.time}] ${newMessage.username}: ${newMessage.message}`);
+        console.log(`[${newMessage.time}] ${newMessage.username} (${newMessage.userId}): ${newMessage.message}`);
         res.status(200).json({ success: true });
     } else {
         res.status(400).send("Message is required");
