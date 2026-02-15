@@ -9,24 +9,27 @@ let chatHistory = [];
 const MAX_HISTORY = 20;
 
 app.post('/update', (req, res) => {
-    // أضفنا userId هنا
-    const { username, userId, message, jobId, placeId } = req.body;
+    // أضفنا جميع البيانات المطلوبة
+    const { username, userId, message, jobId, placeId, playerCount, gameName, isHelpRequest } = req.body;
     
     if (message) {
         const newMessage = {
             id: Date.now() + Math.random(),
             username: username || "Unknown",
-            userId: userId || 0, // أضفنا تخزين الـ id هنا
+            userId: userId || 0,
             message: message,
             jobId: jobId || null,
             placeId: placeId || null,
+            playerCount: playerCount || 0, // عدد اللاعبين في السيرفر
+            gameName: gameName || "لعبة غير معروفة", // اسم اللعبة
+            isHelpRequest: isHelpRequest || false, // تحديد إذا كانت طلب فزعه
             time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
         };
 
         chatHistory.push(newMessage);
         if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
 
-        console.log(`[${newMessage.time}] ${newMessage.username} (${newMessage.userId}): ${newMessage.message}`);
+        console.log(`[${newMessage.time}] ${newMessage.username} (${newMessage.userId}): ${newMessage.message} ${isHelpRequest ? '🚨 طلب فزعه' : ''}`);
         res.status(200).json({ success: true });
     } else {
         res.status(400).send("Message is required");
@@ -34,7 +37,7 @@ app.post('/update', (req, res) => {
 });
 
 app.get('/data', (req, res) => {
-    res.json(chatHistory); // إرسال كل السجل وليس رسالة واحدة
+    res.json(chatHistory);
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
