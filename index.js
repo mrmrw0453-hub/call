@@ -1,14 +1,11 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
-
-app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// تخزين آخر 50 رسالة
-let chatHistory = [];
+// تخزين آخر 20 رسالة فقط للحفاظ على الذاكرة
+let chatHistory = []; 
 const MAX_HISTORY = 20;
 
 app.post('/update', (req, res) => {
@@ -16,26 +13,18 @@ app.post('/update', (req, res) => {
     
     if (message) {
         const newMessage = {
-            id: Date.now() + Math.random(),
+            id: Date.now() + Math.random(), // معرف فريد للرسالة
             username: username || "Unknown",
             message: message,
-            jobId: jobId || null,
-            placeId: placeId || null,
-            time: new Date().toLocaleTimeString('en-US', { 
-                hour12: false, 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            })
+            jobId: jobId || null, // معرف السيرفر للانضمام
+            placeId: placeId || null, // معرف اللعبة
+            time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
         };
 
         chatHistory.push(newMessage);
-        if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
+        if (chatHistory.length > MAX_HISTORY) chatHistory.shift(); // حذف القديم
 
         console.log(`[${newMessage.time}] ${newMessage.username}: ${newMessage.message}`);
-        if (jobId) {
-            console.log(`🚨 HELP REQUEST - Job ID: ${jobId}, Place ID: ${placeId}`);
-        }
-        
         res.status(200).json({ success: true });
     } else {
         res.status(400).send("Message is required");
@@ -43,7 +32,7 @@ app.post('/update', (req, res) => {
 });
 
 app.get('/data', (req, res) => {
-    res.json(chatHistory);
+    res.json(chatHistory); // إرسال كل السجل وليس رسالة واحدة
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
